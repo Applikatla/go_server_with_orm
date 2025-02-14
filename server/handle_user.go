@@ -30,7 +30,25 @@ func registerUser(c *gin.Context) {
 }
 
 func handleLogin(c *gin.Context) {
-
+	var log user1
+	var store user1
+	err := c.ShouldBindJSON(&log)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Internal Error"})
+		return
+	}
+	result := db.Where("id = ?", log.User_id).First(&store)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Database Error"})
+		return
+	}
+	if log.Pass == store.Pass {
+		c.JSON(http.StatusAccepted, gin.H{"message": "Password Verified"})
+		return
+	} else {
+		c.JSON(http.StatusForbidden, gin.H{"massage": "Password not match"})
+		return
+	}
 }
 
 func handlePassword(c *gin.Context) {
